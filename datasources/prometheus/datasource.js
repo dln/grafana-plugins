@@ -118,6 +118,7 @@ function (angular, _, kbn) {
     PrometheusDatasource.prototype.metricFindQuery = function(query) {
       var options;
 
+      query = templateSrv.replace(query);
       var metricsQuery = query.match(/^[a-zA-Z_:*][a-zA-Z0-9_:*]*/);
       var labelValuesQuery = query.match(/^label_values\((.+)\)/);
 
@@ -159,12 +160,12 @@ function (angular, _, kbn) {
         // if query contains full metric name, return metric name and label list
         options = {
           method: 'GET',
-          url: this.url + '/api/v1/query?query=' + encodeURIComponent(query),
+          url: this.url + '/api/v1/query?query=' + encodeURIComponent(query) + '&time=' + (Date.now() / 1000),
         };
 
         return $http(options)
           .then(function(result) {
-            return _.map(result.data.result, function(metricData) {
+            return _.map(result.data.data.result, function(metricData) {
               return {
                 text: getOriginalMetricName(metricData.metric),
                 expandable: true
